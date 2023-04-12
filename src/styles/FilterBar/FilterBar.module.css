@@ -1,0 +1,14 @@
+.filterBar {
+  z-index: 14;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  background: #fff;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.filterBar > * {
+  margin: 0 10px;
+  height: 2rem;
+}

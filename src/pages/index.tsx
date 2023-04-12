@@ -1,11 +1,53 @@
 import Head from 'next/head';
-import NavBar from '@/components/common/NavBar';
-import { Inter } from 'next/font/google';
+import FilterBar from '@/components/FilterBar/FilterBar';
 import styles from '@/styles/Home.module.css';
-
-const inter = Inter({ subsets: ['latin'] });
+import { SelectedCategories, Venture } from '@/libs/types/venture';
+import { Key, SetStateAction, useEffect, useState } from 'react';
+import { VENTURE_CATEGORIES } from '@/libs/constants/venture';
 
 export default function Home() {
+  const [selectedCategories, setSelectedCategories] =
+    useState<SelectedCategories>(
+      VENTURE_CATEGORIES.reduce(
+        (accumulator: SelectedCategories, category: string) => ({
+          ...accumulator,
+          [category]: false,
+        }),
+        {}
+      )
+    );
+  const [ventureList, setVentureList] = useState<Venture[]>([]);
+
+  useEffect(() => {
+    const categoryQuery = Object.entries(selectedCategories)
+      .reduce(
+        (
+          accumulator: string[],
+          [category, categoryState]: [string, boolean]
+        ) => {
+          if (categoryState) {
+            accumulator.push(category);
+          }
+          return accumulator;
+        },
+        []
+      )
+      .join(',');
+    const categoryParams = new URLSearchParams({ categories: categoryQuery });
+    fetch('/api/ventures?' + categoryParams)
+      .then((res) => res.json())
+      .then((data: Venture[]) => {
+        setVentureList(data);
+      });
+  }, [selectedCategories]);
+
+  const handleCategoryToggle = (category: string) => {
+    setSelectedCategories((prevState: SetStateAction<SelectedCategories>) => ({
+      ...prevState,
+      [category]: !selectedCategories[category],
+    }));
+  };
+
   return (
     <>
       <Head>
@@ -14,9 +56,16 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <NavBar />
       <main className={styles.main}>
-        
+        <FilterBar
+          handleCategoryToggle={handleCategoryToggle}
+          selectedCategories={selectedCategories}
+        />
+        {ventureList.map((venture: Venture) => (
+          <div key={venture.id as Key}>
+            {venture.name} - {venture.description}
+          </div>
+        ))}
       </main>
     </>
   );

@@ -1,9 +1,0 @@
-.navitem {
-  z-index: 14;
-  width: 240px;
-  height: 40px;
-  margin: 5px;
-  display: flex;
-  background: #000;
-  justify-content: space-around;
-}
